@@ -55,6 +55,27 @@ Body plate and bumper have middle reflection.
 Window glass has low reflection (or no reflection).
 
 
+### Compute layers of the BEV map (ID_S2_EX1-3)
+
+1_000
+![](img/1_000_bev.png)
+![](img/1_000_intencity.png)
+![](img/1_000_height.png)
+
+Both intencity layer and height layer have engouh information for detect vehicle edge,
+but height layer has more clear edge than intencity layer.
+
+
+### Extract 3D bounding boxes from model response (ID_S3_EX2)
+
+1_000
+![](img/1_000_labels.png)
+
+2 vehicles near to ego-vehicle is detected,
+but 3rd and 4th vehicle are not detected.
+(becase they are too far?)
+
+
 ### Compute precision and recall (ID_S4_EX3)
 
  - data_filename : `training_segment-1005081002024129653_5313_150_5333_150_with_camera_labels.tfrecord`
