@@ -36,3 +36,8 @@ sigma_lidar_y = 0.1 # measurement noise standard deviation for lidar y position
 sigma_lidar_z = 0.1 # measurement noise standard deviation for lidar z position   
 sigma_cam_i = 5 # measurement noise standard deviation for image i coordinate
 sigma_cam_j = 5 # measurement noise standard deviation for image j coordinate
+
+# additional opts
+max_score = 1.0 # max track score
+min_score = -1.0 # min track score
+delete_threshold_for_all_states = -0.5 # track score threshold to delete tracks (for all states)
