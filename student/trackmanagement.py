@@ -34,22 +34,21 @@ class Track:
         # unassigned measurement transformed from sensor to vehicle coordinates
         # - initialize track state and track score with appropriate values
         ############
+        z_ = np.matrix(np.zeros((4,1)))
+        z_[0:3] = meas.z[0:3] 
+        z_[3] = 1
+        self.x = np.matrix(np.zeros((6,1)))
+        self.x[0:3] = (meas.sensor.sens_to_veh * z_)[0:3]
 
-        self.x = np.matrix([[49.53980697],
-                        [ 3.41006279],
-                        [ 0.91790581],
-                        [ 0.        ],
-                        [ 0.        ],
-                        [ 0.        ]])
-        self.P = np.matrix([[9.0e-02, 0.0e+00, 0.0e+00, 0.0e+00, 0.0e+00, 0.0e+00],
-                        [0.0e+00, 9.0e-02, 0.0e+00, 0.0e+00, 0.0e+00, 0.0e+00],
-                        [0.0e+00, 0.0e+00, 6.4e-03, 0.0e+00, 0.0e+00, 0.0e+00],
-                        [0.0e+00, 0.0e+00, 0.0e+00, 2.5e+03, 0.0e+00, 0.0e+00],
-                        [0.0e+00, 0.0e+00, 0.0e+00, 0.0e+00, 2.5e+03, 0.0e+00],
-                        [0.0e+00, 0.0e+00, 0.0e+00, 0.0e+00, 0.0e+00, 2.5e+01]])
-        self.state = 'confirmed'
-        self.score = 0
-        
+        self.P = np.matrix(np.zeros((6,6)))
+        self.P[0:3, 0:3] = M_rot * meas.R * np.transpose(M_rot)
+        self.P[3,3] = params.sigma_p44**2
+        self.P[4,4] = params.sigma_p55**2
+        self.P[5,5] = params.sigma_p66**2
+
+        self.state = 'initialized'
+        self.score = 1.0 / params.window
+
         ############
         # END student code
         ############ 
@@ -107,9 +106,16 @@ class Trackmanagement:
             if meas_list: # if not empty
                 if meas_list[0].sensor.in_fov(track.x):
                     # your code goes here
-                    pass 
+                    track.score -= 1./params.window
+                    track.score = max(params.min_score, track.score)
+
 
         # delete old tracks   
+        for track in self.track_list:
+            if ((track.state == 'confirmed' and track.score < params.delete_threshold)
+                    or (track.P[0, 0] > params.max_P or track.P[1, 1] > params.max_P)
+                    or (track.score < params.delete_threshold_for_all_states)):
+                self.delete_track(track)
 
         ############
         # END student code
@@ -139,9 +145,14 @@ class Trackmanagement:
         # - increase track score
         # - set track state to 'tentative' or 'confirmed'
         ############
+        track.score += 1 / params.window
+        track.score = min(params.max_score, track.score)
 
-        pass
-        
+        if track.score > params.confirmed_threshold:
+            track.state = 'confirmed'
+        else:
+            track.state = 'tentative'
+
         ############
         # END student code
         ############ 
